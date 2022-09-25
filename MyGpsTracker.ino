@@ -6,8 +6,9 @@
 SMSGSM sms;
 GPS gps;
 int SecondsCntr = 0;
-byte TenSecondsCntr = 0;
-int MinutesCntr = 5;
+byte TenSecondsCntr = 10;
+int MinutesCntr = 3;
+boolean every_ten_seconds = false;
 const char *MY_PHONE_NUMBER = "02040782039";
 
 
@@ -26,8 +27,8 @@ char smsbuffer[160];
 char good_location[30];
 char n[20];
 int timer1_counter;
-boolean every_ten_seconds = false;
-#define ledPin 13
+
+int RXLED = 17;
 
 
 void setup()
@@ -44,7 +45,9 @@ void setup()
          GpsStarted=true;
      }
 
-     pinMode(ledPin, OUTPUT);
+     strcpy (good_location, "");
+     pinMode(RXLED, OUTPUT);  // Set RX LED as an output
+     digitalWrite(RXLED, HIGH);   // set the RX LED OFF
 
 // initialize timer1 
   noInterrupts();           // disable all interrupts
@@ -65,10 +68,9 @@ void setup()
 ISR(TIMER1_OVF_vect)        // interrupt service routine
 {                      
    TCNT1 = timer1_counter;   // preload timer
-   digitalWrite(ledPin, digitalRead(ledPin) ^ 1);
    SecondsCntr++; 
    TenSecondsCntr++;
-   if (TenSecondsCntr == 10) {
+   if (TenSecondsCntr >= 10) {
       TenSecondsCntr = 0;
       every_ten_seconds = true;
    }
@@ -107,8 +109,10 @@ void loop()
             int gpsStatus = gps.IsFixed();     
             if (gpsStatus == 0) {
                 Serial.println ("WAITING FOR GPS FIX");
+                digitalWrite(RXLED, HIGH);   // set the RX LED OFF
             }
             if (gpsStatus == 1) {
+                digitalWrite(RXLED, LOW);   // set the RX LED ON
                 char location[30];
                 if (gps.GetLocation(location))
                 {

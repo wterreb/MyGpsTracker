@@ -3,7 +3,7 @@
 
 #include "SIM900.h"
 
-#define DEBUG_ON
+//#define DEBUG_ON
 
 class SMSGSM {
 public:
